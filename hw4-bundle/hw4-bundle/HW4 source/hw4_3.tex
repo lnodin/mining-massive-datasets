@@ -1,0 +1,105 @@
+\section{Clustering Data Streams (20 points) }
+
+\paragraph{Introduction.}
+In this problem, we study an approach for clustering massive data streams. We will study a framework for turning an approximate clustering algorithm into one that can work on data streams, \emph{i.e.}, one which needs a small amount of memory and a small number of (actually, just one) passes over the data. As the instance of the clustering problem, we will focus on the $k$-means problem.
+
+\paragraph{Definitions.}
+Before going into further details, we need some definitions:
+\begin{itemize}
+	\item The function $d:\mathbb{R}^{p}\times \mathbb{R}^{p} \rightarrow \mathbb{R}^{+}$ denotes the Euclidean distance:
+	\[
+		d(x,y) = ||x-y||_2.
+	\]
+	\item For any $x\in \mathbb{R}^p$ and $T\subset \mathbb{R}^p$, we define:
+	\[
+		d(x,T)=\min_{z\in T}\{d(x,z)\}.
+	\]
+	\item Having subsets $S,T\subset \mathbb{R}^{p}$, and a weight function $w:S\rightarrow \mathbb{R}^{+}$, we define:
+	\[
+		\mathrm{cost}_w(S,T)=\sum_{x\in S} w(x)d(x,T)^2.
+	\]
+	\item Finally, if for all $x\in S$ we have $w(x)=1$, we simply denote $\mathrm{cost}_w(S,T)$ by $\mathrm{cost}(S,T)$.
+\end{itemize}
+
+\paragraph{Reminder: $k$-means clustering.}
+The $k$-means clustering problem is as follows: given a subset $S\subset \mathbb{R}^p$, and an integer $k$, find the set $T$ (with $|T|=k$), which minimizes $\mathrm{cost}(S,T)$. If a weight function $w$ is also given, the $k$-means objective would be to minimize $\mathrm{cost}_w(S,T)$, and we call the problem the weighted $k$-means problem.
+
+\paragraph{Strategy for clustering data streams.}
+We assume we have an algorithm \textsc{alg} which is an $\alpha$-approximate weighted $k$-means clustering algorithm (for some $\alpha>1$). In other words, given any $S\subset \mathbb{R}^p$, $k\in\mathbb{N}$, and a weight function $w$, \textsc{alg} returns a set $T\subset
+\mathbb{R}^p$, $|T|=k$, such that:
+\[
+	\mathrm{cost}_w(S,T)\leq \alpha \min_{|T'|=k}\{\mathrm{cost}_w(S,T')\}.
+\]
+\textbf{We will see how we can use {\sc alg} as a building block to make an algorithm for the $k$-means problem on data streams.}
+
+The basic idea here is that of divide and conquer: if $S$ is a huge set that does not fit into main memory, we can read a portion of it that does fit into memory, solve the problem on this subset (\emph{i.e.}, do a clustering on this subset), record the result (\emph{i.e.}, the cluster centers and some corresponding weights, as we will see), and then read a next portion of $S$ which is again small enough to fit into memory, solve the problem on this part, record the result, etc. At the end, we will have to combine the results of the partial problems to construct a solution for the main big problem (\emph{i.e.}, clustering $S$).
+
+To formalize this idea, we consider the following algorithm, which we denote as
+\textsc{algstr}:
+
+\begin{itemize}
+	\item Partition $S$ into $\ell$ parts $S_1, \ldots, S_{\ell}$.
+  \item For each $i=1$ to $\ell$, run \textsc{alg} on $S_i$ to get a set of $k$ centers
+  $T_i=\{t_{i1}, t_{i2}, \ldots, t_{ik}\}$, and assume $\{S_{i1},S_{i2}, \ldots,
+  S_{ik}\}$ is the corresponding clustering of $S_i$ (\emph{i.e.}, $S_{ij} = \{x\in
+  S_i| \, d(x,t_{ij}) < d(x,t_{ij'}) \; \forall j'\neq j, 1\leq j'\leq k\}$).
+  \item Let $\widehat{S}= \bigcup_{i=1}^{\ell}T_i$, and define weights $w(t_{ij}) =
+  |S_{ij}|$.
+  \item Run \textsc{alg} on $\widehat{S}$ with weights $w$, to get $k$ centers $T$.
+  \item Return $T$.
+\end{itemize}
+
+Now, we analyze this algorithm. Assuming $T^{*}=\{t^{*}_1, \ldots, t^{*}_k\}$ to
+be the optimal $k$-means solution for $S$ (that is, $T^{*} =
+\mathrm{argmin}_{|T'|=k}\{\mathrm{cost}(S,T')\}$), we would like to compare
+$\mathrm{cost}(S,T)$ (where $T$ is returned by \textsc{algstr}) with
+$\mathrm{cost}(S,T^{*})$.
+
+A small fact might be useful in the analysis below: for any ${(a,b) \in \mathbb{R}^+}$ we have: \[{(a+b)^2 \leq 2a^2 + 2b^2.}\]
+
+\subquestion{(a) [5pts]} First, we show that the cost of the final clustering can be bounded in terms of the total cost of the intermediate clusterings:
+
+\task{Prove that: \[\mathrm{cost}(S,T) \leq 2\cdot \mathrm{cost}_w(\widehat{S},
+T) + 2\sum_{i=1}^{\ell} \mathrm{cost}(S_i, T_i).\]}
+
+\hint{You might want to use Triangle Inequality for Euclidean distance $d$.}
+
+
+\subquestion{(b) [5pts]} So, to bound the cost of the final clustering, we can
+bound the terms on the right hand side of the inequality in part (a).
+Intuitively speaking, we expect the second term to be small compared to
+$\mathrm{cost}(S,T^{*})$, because $T^{*}$ only uses $k$ centers to represent the
+data set ($S$), while the $T_i$'s, in total, use $k\ell$ centers to represent
+the same data set (and $k\ell$ is potentially much bigger than $k$). We show this formally:
+
+\task{Prove that: \[{\sum_{i=1}^{\ell} \mathrm{cost}(S_i, T_i) \leq \alpha \cdot \mathrm{cost}(S,T^{*})}.\]}
+
+
+\subquestion{(c) [10pt]} Prove that \textsc{algstr} is a $(4\alpha^2+6\alpha)$-approximation algorithm for the $k$-means problem.
+
+\task{
+Prove that:  
+\[{\mathrm{cost}(S,T) \leq (4\alpha^2+6\alpha)
+\cdot \mathrm{cost}(S,T^{*})}.\]} 
+
+\textit{Hint: You might want to first prove two useful facts, which help bound the first term on the right hand side of the inequality in part (a):}
+\[{\mathrm{cost}_w(\widehat{S}, T) \leq \alpha \cdot \mathrm{cost}_w(\widehat{S},T^{*})}.\]
+\[{\mathrm{cost}_w(\widehat{S},
+T^{*}) \leq 2\sum_{i=1}^{\ell} \mathrm{cost}(S_i, T_i) + 2\cdot \mathrm{cost}(S,T^{*})}.\]
+
+
+\textbf{Additional notes:} We have shown above that \textsc{algstr} is a $(4\alpha^2+6\alpha)$-approximation algorithm for the $k$-means problem. Clearly, $4\alpha^2+6\alpha > \alpha$, so \textsc{algstr} has a somewhat worse approximation guarantee than \textsc{alg} (with which we started).  However, \textsc{algstr} is better suited for the streaming application, as not only it takes just one pass over the data, but also it needs a much smaller amount of memory.
+
+Assuming that \textsc{alg} needs $\Theta(n)$ memory to work on an input set $S$ of size $n$  (note that just representing $S$ in memory will need $\Omega(n)$ space), if we partitioning $S$ into $\sqrt{n/k}$ equal parts, {\sc algstr} can work with only ${O(\sqrt{nk})}$ memory. (Like in the rest of the problem, $k$ represents the number of clusters per partition.)
+
+Note that for typical values of $n$ and $k$, assuming $k \ll n$, we have $\sqrt{nk} \ll n$. For instance, with $n=10^6$, and $k=100$, we have $\sqrt{nk} = 10^4$, which is $100$ times smaller than $n$.
+
+\subsection*{What to submit}
+\begin{enumerate}[(a)]
+	\item Proof that $\mathrm{cost}(S,T) \leq 2\cdot
+	\mathrm{cost}_w(\widehat{S}, T) + 2\sum_{i=1}^{\ell} \mathrm{cost}(S_i, T_i)$.
+	\item Proof that $\sum_{i=1}^{\ell} \mathrm{cost}(S_i, T_i) \leq
+\alpha \cdot \mathrm{cost}(S,T^{*})$.
+	\item Proof that $\mathrm{cost}(S,T) \leq (4\alpha^2+6\alpha)
+\cdot \mathrm{cost}(S,T^{*})$.
+\end{enumerate}

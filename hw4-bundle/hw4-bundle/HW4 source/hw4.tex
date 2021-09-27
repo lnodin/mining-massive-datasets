@@ -1,0 +1,114 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{url}
+\usepackage{color}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{fancyhdr}
+\usepackage{enumerate}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{bm}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage{pifont}
+
+
+%%---------------------------------------------------------------------------
+%%      Margins:
+%%---------------------------------------------------------------------------
+\oddsidemargin  0in \evensidemargin 0in \topmargin -0.5in
+\headheight 0.25in \headsep 0.25in
+\textwidth   6.5in \textheight 9in %\marginparsep 0pt \marginparwidth 0pt
+\parskip 1.5ex  \parindent 0ex \footskip 20pt
+
+
+%%---------------------------------------------------------------------------
+%%      "Alternate sectioning"
+%%---------------------------------------------------------------------------
+\newcommand{\note}[1]{\textsf{{\textcolor{red}{[[#1]]}}}}
+\newcommand{\boxcomment}[1]{\noindent\fbox{\parbox{\textwidth}{#1}}\medskip\\}
+\newcommand{\xhdr}[1]{\paragraph{\bf{#1}}}
+\newcommand{\subquestion}[1]{\subsubsection*{{#1}}}
+%\newcommand{\Solution}[1]{}
+\newcommand{\Solution}[1]{\paragraph{\bf $\bigstar $ SOLUTION:} {\sf #1} \bigskip}
+\newcommand{\Mistake}[2]{\paragraph{\bf $\blacksquare$ COMMON MISTAKE #1:} {\sf #2} \bigskip}
+\newcommand{\task}[1]{{\bfseries Task:} #1}
+\newcommand{\hint}[1]{{\itshape Hint:} #1}
+
+
+%%---------------------------------------------------------------------------
+%%      Theorems and other environments:
+%%---------------------------------------------------------------------------
+\newcounter{lecture} \setcounter{lecture}{0}
+\newtheorem{thm}{Theorem}%[lecture]
+\newtheorem{prop}{Proposition}%[lecture]
+\newtheorem{lemma}{Lemma}%[lecture]
+\newtheorem{result}{Result}%[lecture]
+\newtheorem{cor}{Corollary}%[lecture]
+\newtheorem{claim}{Claim}%[lecture]
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+\newenvironment{solution}{{\bf Solution:}}{\hfill\rule{2mm}{2mm}}
+\newcounter{example}
+\newenvironment{example}[1][]
+ {\refstepcounter{example}{\bf Example~\arabic{example}~#1}}{}
+ \renewcommand{\theexample}{\arabic{example}}
+\newcounter{problem}
+\newenvironment{problem}[1][]
+ {\refstepcounter{problem}{\bf Problem~\arabic{lecture}.\arabic{problem}~#1 (Do
+ not use this environment, use a \\section instead) }}{}
+ \renewcommand{\theproblem}{\arabic{lecture}.\arabic{problem}}
+
+\newcounter{definition}
+\newenvironment{definition}[1][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newcounter{algorithm}
+\newenvironment{algorithm}[1][]
+ {\refstepcounter{algorithm}{\bf Algorithm~\arabic{algorithm}~#1}}{}
+ \renewcommand{\thedefinition}{\arabic{algorithm}}
+
+
+%%---------------------------------------------------------------------------
+%%      Header
+%%---------------------------------------------------------------------------
+\newfont{\bssten}{cmssbx10}
+\newfont{\bssnine}{cmssbx10 scaled 900}
+\newfont{\bssdoz}{cmssbx10 scaled 1200}
+\pagestyle{fancy}  % use this?
+ \fancyhead{\bssnine CS 246: Mining Massive Data Sets - Problem Set 4}
+ \fancyhead[RE]{} \fancyhead[LO]{}
+ \fancyhead[LE]{\bssnine \arabic{page}} \fancyhead[RO]{\bssnine \arabic{page}}
+ \lfoot{} \cfoot{} \rfoot{}
+
+%%---------------------------------------------------------------------------
+\newtheorem{pb}{Problem}
+\newcommand{\tr}{\mbox{tr}}
+\newcommand{\suchthat}{\, \mid \,} % nice "such that"
+
+\newcommand{\minimize}{\quad \text{minimize} \quad} % nice "such that"
+\newcommand{\maximize}{\quad \text{maximize} \quad} % nice "such that"
+\newcommand{\subjectto}{\quad \text{subject to} \quad} % nice "such that"
+
+
+\newcommand{\pr}[1]{\mathsf{Pr}\left[#1\right]}
+
+
+\setcounter{lecture}{1}
+\begin{document}
+\thispagestyle{empty}
+\boxcomment{
+{\bf \textsf{CS246: Mining Massive Data Sets \hfill Spring 2021}}\medskip \\
+
+\centerline{\LARGE \bf \textsf{Problem Set 4}}\medskip
+{\hfill Please read the homework submission policies at \url{http://cs246.stanford.edu}.\hfill}
+}
+%\input{./hw4_linsep.tex}
+\input{./hw4_nn.tex}
+\input{./hw4_dtree.tex}
+\input{./hw4_3.tex}
+\input{./hw4_streams.tex}
+
+
+\end{document}

@@ -1,0 +1,110 @@
+\section{Implementation of Feed-Forward Neural Network (30 points) }
+Here, you will implement a simple one-layer feed-forward neural network (perceptron) from scratch to solve a classification task. To recap, a fully connected layer can be represented as a function parameterized by weight $\mathbf{W}$ and bias $b$, such that for row vector $\mathbf{x}$:
+\begin{align}
+f_{\mathbf{W},b}(\mathbf{x}) = \mathbf{x}\mathbf{W} + b
+\end{align}
+For classification tasks, one of the most common practice is to use a softmax function followed by a cross entropy loss. As shown in section 13.2.5 of the textbook, for a vector $\mathbf{x}=[x_1, x_2, \dotsc, x_n]$, the softmax function is defined as:
+\begin{align}
+\mu (\mathbf{x})_i = \frac{e^{x_i}}{\sum_j e^{x_j}}
+\end{align}
+\begin{align}
+\mu (\mathbf{x}) = \left[\frac{e^{x_1}}{\sum_j e^{x_j}}, \dotsc, \frac{e^{x_n}}{\sum_j e^{x_j}}\right]
+\end{align}
+
+As shown in section 13.2.9 of the textbook, for target probability distribution $\mathbf{p}=[p_1, p_2, \dotsc, p_n]$ and a different probability distribution $\mathbf{q}=[q_1, q_2, \dotsc, q_n]$, the cross entropy $L(\mathbf{p}, \mathbf{q})$ is defined as:
+\begin{align}
+L(\mathbf{p}, \mathbf{q}) = - \sum_{i=1}^{n} p_i \log q_i
+\end{align}
+
+Note that in supervised learning, the target probability distribution $\mathbf{p}$ is usually represented as a one-hot vector, where $p_i=1$ shows that the corresponding input belongs to the $i$-th class with probability 1.
+
+We can now represent our one-layer feed-forward neural network as a function $f_N$, such that for input vector $\mathbf{x}$ and its one-hot label vector $\mathbf{y}$:
+\begin{align}
+f_N(\mathbf{x}) = \mu(f_{\mathbf{W},b}(\mathbf{x}))
+\end{align}
+
+The loss for this input is thus $L(\mathbf{y}, f_N(\mathbf{x}))$. For a dataset $\mathcal{D}$ of size $N$, the loss is:
+\begin{align}
+L(\mathcal{D}) = \frac{1}{N} \sum_{i=1}^N L(\mathbf{y_i}, f_N(\mathbf{x_i}))
+\end{align}
+
+In order to minimize the loss function, we need to obtain the gradient with respect to weight $\mathbf{W}$ and bias $b$. In the next questions you will derive these gradient expressions using the chain rule.
+
+\subquestion{(a) [5 Points]}
+
+\task{What is $\frac{\partial L(\mathbf{y}, \mathbf{q})}{\partial q_i}$, the gradient of cross entropy loss $L(\mathbf{y}, \mathbf{q})$ with respect to $q_i$?}
+
+
+\subquestion{(b) [5 Points]}
+\task{What is $\frac{\partial \mu(\mathbf{x})_j}{\partial x_i}$, the gradient of softmax function $\mu(\mathbf{x})_j$ with respect to $x_i$? You should consider both $i=j$ and $i\neq j$.}
+
+
+
+\subquestion{(c) [5 Points]}
+\task{What is $\frac{\partial f_{\mathbf{W},b}(\mathbf{x})}{\partial W_{ij}}$ and $\frac{\partial f_{\mathbf{W},b}(\mathbf{x})}{\partial b}$, the gradient of fully connected layer $f_{\mathbf{W},b}(\mathbf{x})$ with respect to the $ij$-th entry of weight $\mathbf{W}$ and bias $b$?}
+
+\bigskip
+
+Now, you should be able to assemble the full gradient of weight and bias $\frac{\partial L(\mathcal{D})}{\partial W_{ij}}$, $\frac{\partial L(\mathcal{D})}{\partial b}$ using chain rule and the gradients you derived above. 
+
+\subquestion{(d) [15 Points]}
+
+Next, let's go ahead and implement the one-layer neural network. Implement both the forward pass $L(\mathcal{D})$ and the backward gradient $\frac{\partial L(\mathcal{D})}{\partial W_{ij}}$ and $\frac{\partial L(\mathcal{D})}{\partial b}$. For optimization, we will implement Minibatch gradient descent and compare different batch sizes. \textbf{For this problem, you are allowed to keep the dataset in memory, and you do not need to use Spark. You are also allowed to use any external library, but we encourage you to implement gradients from scratch to deepen your understanding.}
+
+\bigskip
+
+
+\textbf{Mini batch gradient descent}: Go through the dataset in batches of predetermined size and update the parameters as follows:
+\begin{algorithmic}
+\WHILE {convergence criteria not reached}
+\STATE Randomly pick $n=batch\_size$ random samples $\mathbf{x_k}$ from the training data
+
+\FOR {$k = 1,...,n$}
+\STATE Update $W_{ij} \leftarrow W_{ij} - \eta \frac{\partial L(\mathcal{D})}{\partial W_{ij}}$ for all i, j in $\mathbf{W}$
+\STATE Update $b \leftarrow b - \eta \frac{\partial L(\mathcal{D})}{\partial b}$
+\ENDFOR
+\ENDWHILE
+\end{algorithmic}
+where $\eta$ is the learning rate and $batch\_size$ is the number of training samples considered in each batch. \\
+
+For \textbf{convergence criteria}, you should stop learning when the cross entropy loss on \textbf{all data samples} is smaller than $0.4$. You are encouraged to vectorize your loss function and gradient calculation, but it's not required. 
+
+You will compare the performance of 3 different batch sizes.
+\begin{enumerate}
+    \item $batch\_size=1$. This is equivalent to stochastic gradient descent. Please use $\eta=0.1$.
+    \item $batch\_size=20$. Please use $\eta=0.1$.
+    \item $batch\_size=N$, where N is the total number of data samples. This is equivalent to full batch gradient descent. Please use $\eta=0.25$.
+\end{enumerate}
+
+Run your implementation on the data set in \textbf{q1/data}. The data set contains the following files :
+\begin{enumerate}
+\item \texttt{features.txt} : Each line contains features (comma-separated values) for a single datapoint. It has 6414 datapoints (rows) and 122 features (columns). 
+
+\item \texttt{targets.txt} : Each line contains the target variable (y = 0 or 1) for the corresponding row in \texttt{features.txt}.
+\end{enumerate}
+
+
+\task{Plot the value of cross entropy loss on \textbf{all data samples} $L(\mathcal{D})$ vs. the number of iterations ($k$) for all three batch sizes  until \textbf{convergence}. Report the total wall-clock runtime (second) taken for convergence by each of the batch size. Comment on the plots and the time for convergence. What can you infer from them?}
+
+The diagram should have graphs from all the three batch sizes on the same plot. 
+
+\bigskip
+\textbf{Important Note}
+\begin{itemize}
+    \item You should initialize your weight $\mathbf{W}$ following a normal distribution with mean 0 and standard deviation 1. You should initialize your bias $b$ to zeros. To make sure we have a fair comparison, please use the same initialization of weight and bias for all three runs. 
+    \item When computing the loss, remember to divide the total summed loss and gradient by the number of data points (i.e., batch size). This has been shown in Equation 6.
+    \item You should calculate your cross entropy loss on \textbf{all data samples} for plotting and identifying convergence, not on the mini-batch of data samples.
+    
+\end{itemize}
+As a sanity check, using batch size $N$ should converge in 10-400 iterations, batch size 20 between 400-1000 iterations and batch size 1 between 1000-2500 iterations. However, the number of iterations may vary greatly due to the high randomness of this problem. If your implementation consistently takes longer iterations though, you may have a bug.
+
+
+\subsection*{What to submit}
+\begin{enumerate}[(i)]
+	\item Equation for part (a)
+	\item Equation for part (b)
+	\item Two equations for part (c)
+	\item Plots for the cross entropy loss $L(\mathcal{D})$ vs. the number of iterations ($k$) for all three batch sizes 1, 20 and $N$. Total time taken for convergence by each of the batch size.  Interpretation of plot and convergence times. [part (d)]
+	\item Submit the code on Gradescope submission website. [part (d)]
+\end{enumerate}
+

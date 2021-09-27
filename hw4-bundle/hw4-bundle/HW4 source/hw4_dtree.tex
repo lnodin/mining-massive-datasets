@@ -1,0 +1,57 @@
+\section{Decision Tree Learning (20 points)}
+ 
+In this problem, we want to construct a decision tree to find out if a person will enjoy beer.
+
+\paragraph{Definitions.} Let there be $k$ binary-valued attributes in the data. 
+
+We pick an attribute that maximizes the gain at each node:
+\begin{equation}\label{G}
+%	G = \max [I(D) - (I(D_L) + I(D_R))];
+	G = I(D) - (I(D_L) + I(D_R));
+\end{equation}
+where $D$ is the given dataset, and $D_L$ and $D_R$ are the sets on left and right hand-side branches after division. Ties may be broken arbitrarily. 
+
+There are three commonly used impurity measures used in binary decision trees: Entropy, Gini index, and Classification Error. In this problem, we use Gini index and define $I(D)$ as follows\footnote{As an example, if $D$ has 10 items, with 4 positive items (\emph{i.e.} 4 people who enjoy beer), and 6 negative items (\emph{i.e.} 6 who do not), we have $I(D) = 10 \times (1 - (0.16 + 0.36))$.}:
+\[
+	I(D) = |D| \times \left(1-\sum_i p_i^2\right),
+\]
+where:
+\begin{itemize}
+	\item $|D|$ is the number of items in $D$;
+	\item $1 - \sum_i p_i^2$ is the gini index;
+	\item $p_i$ is the probability distribution of the items in $D$, or in other words, $p_i$ is the fraction of items that take value $i\in\{+,-\}$. Put differently, $p_+$ is the fraction of positive items and $p_-$ is the fraction of negative items in $D$.
+\end{itemize}
+
+Note that this intuitively has the feel that the more evenly-distributed the numbers are, the lower the $\sum_i p_i^2$, and the larger the impurity.
+
+\subquestion{(a) [10 Points]}
+Let $k = 3$. We have three binary attributes that we could use: ``likes wine'', ``likes running'' and ``likes pizza''.  Suppose the following:
+\begin{itemize}
+	\item There are 100 people in sample set, 40 of whom like beer and 60 who don't.
+	\item Out of the 100 people, 50 like wine; out of those 50 people who like wine, 20 like beer.
+	\item Out of the 100 people, 30 like running; out of those 30 people who like running, 20 like beer.
+	\item Out of the 100 people, 80 like pizza; out of those 80 people who like pizza, 30 like beer.
+	\end{itemize}
+\task{What are the values of $G$ (defined in Equation~\ref{G}) for wine, running and pizza attributes? Which attribute would you use to split the data at the root if you were to maximize the gain $G$ using the gini index metric defined above?}
+
+
+\subquestion{(b) [10 Points]}
+Let's consider the following example:
+\begin{itemize}
+\item There are $100$ attributes with binary values $a_1, a_2, a_3, \ldots, a_{100}$.
+\item Let there be one example corresponding to each possible assignment of 0's and 1's to the values $a_1, a_2, a_3 \ldots, a_{100}$. (Note that this gives us $2^{100}$ training examples.)
+\item Let the values taken by the target variable $y$ depend on the values of $a_1$ for $99 \%$ of the datapoints. More specifically, of all the datapoints where $a_1=1$, let $99 \%$ of them are labeled $+$. Similarly, of all the datapoints where $a_1 = 0$, let $99 \%$ of them are labeled with $-$.  (Assume that the values taken by $y$ depend on $a_2, a_3, \dots, a_{100}$ for fewer than $99\%$ of the datapoints.)
+\item Assume that we build a complete binary decision tree (\emph{i.e.}, we use values of all attributes).
+\end{itemize}
+
+\task{Explain what the decision tree will look like. (A one line explanation will suffice.) Also, in 2-3 sentences, identify what the desired decision tree for this situation should look like to avoid overfitting, and why.(The desired decision tree isn't necessarily a complete binary decision tree)}
+
+
+\subsection*{What to submit}
+\begin{enumerate}[(i)]
+	\item Values of $G$ for wine, running and pizza attributes. [part (a)]
+	\item The attribute you would use for splitting the data at the root. [part (a)]
+	\item Explain what the decision tree looks like in the described setting. Explain how a decision tree should look like to avoid overfitting. (1-2 lines each) [part (b)]
+\end{enumerate}
+
+

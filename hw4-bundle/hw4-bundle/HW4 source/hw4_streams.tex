@@ -1,0 +1,78 @@
+\section{Data Streams (30 points)}
+
+In this problem, we study an approach to approximating the frequency of occurrences of different items in a data stream. Assume $S = \langle a_1, a_2, \ldots, a_t \rangle$ is a data stream of items from the set $\{1, 2, \ldots, n\}$. Assume for any $1\leq i\leq n$, $F[i]$ is the number of times $i$ has appeared in $S$. We would like to have good approximations of the values $F[i]$ ($1\leq i\leq n$) at all times.
+
+A simple way to do this is to just keep the counts for each item $1\leq i\leq n$ separately. However, this will require $\mathcal{O}(n)$ space, and in many applications (e.g., think online advertising and counts of user's clicks on ads) this can be prohibitively large. We see in this problem that it is possible to approximate these counts using a much smaller amount of space. To do so, we consider the algorithm explained below.
+
+\paragraph{Strategy.} The algorithm has two parameters $\delta, \epsilon >0$. It picks $\left\lceil \log\frac{1}{\delta}\right\rceil$ independent hash functions:
+\[
+\forall j \in \left\llbracket 1; \left\lceil \log\frac{1}{\delta}\right\rceil\right\rrbracket, \quad h_j:\{1,2,\ldots, n\} \rightarrow \{1,2, \ldots, \left\lceil \frac{e}{\epsilon} \right\rceil\},
+\]
+where $\log$ denotes natural logarithm. Also, it associates a count $c_{j,x}$ to any $1\leq j\leq  \left\lceil \log\frac{1}{\delta}\right\rceil$ and $1\leq x \leq  \left\lceil \frac{e}{\epsilon} \right\rceil$. In the beginning of the stream, all these counts are initialized to $0$. Then, upon arrival of each $a_k$ ($1\leq k \leq t$), each of the counts $c_{j, h_j(a_k)}$ ($1\leq j\leq \left\lceil \log\frac{1}{\delta}\right\rceil$) is incremented by $1$. 
+
+For any $1\leq i\leq n$, we define $\tilde{F}[i] = \min_{j} \{c_{j,h_j(i)}\}$. We will show that $\tilde{F}[i]$ provides a good approximation to $F[i]$. 
+
+\paragraph{Memory cost.} Note that this algorithm only uses $\mathcal{O}\left(\frac{1}{\epsilon}\log\frac{1}{\delta}\right)$ space.
+
+\paragraph{Properties.} A few important properties of the algorithm presented above:
+\begin{itemize}
+\item For any $1\leq i\leq n$:
+\[
+	\tilde{F}[i]\geq F[i].
+\]
+\item For any $1\leq i\leq n$ and $1\leq j\leq \lceil \log(\frac{1}{\delta})\rceil$:
+\[
+	\mathsf{E}\left[c_{j,h_j(i)}\right] \leq F[i] + \frac{\epsilon}{e} (t - F[i]).
+\]
+\end{itemize}
+
+\subquestion{(a) [10 Points]} Prove that:
+\[
+	\pr{\tilde{F}[i] \leq F[i] + \epsilon t} \geq 1-\delta.
+\]
+\emph{Hint: Use Markov inequality and the property of independence of hash functions.}
+
+Based on the proof in part (a) and the properties presented earlier, it can be inferred that $\tilde{F}[i]$ is a good approximation of $F[i]$ for any item $i$ such that $F[i]$ is not very small (compared to $t$). In many applications (\emph{e.g.}, when the values $F[i]$ have a heavy-tail distribution), we are indeed only interested in approximating the frequencies for items which are not too infrequent. We next consider one such application.
+
+\subquestion{(b) [20 Points]}
+
+\paragraph{Warning.} This implementation question requires substantial computation time %- Python / Java / C / C++ implementations will be faster. 
+Python implementation reported to take 15min - 1 hour. Therefore, we advise you to start early.
+
+\paragraph{Dataset.} %\url{http://snap.stanford.edu/class/cs246-data/HW4-q4.zip}
+The dataset in \textbf{q4/data} contains the following files:
+\begin{enumerate}
+\item \texttt{words\_stream.txt} Each line of this file is a number, corresponding to the ID of a word in the stream.
+\item \texttt{counts.txt} Each line is a pair of numbers separated by a tab. The first number is an ID of a word and the second number is its associated exact frequency count in the stream.
+\item \texttt{words\_stream\_tiny.txt} and \texttt{counts\_tiny.txt} are smaller versions of the dataset above that you can use for debugging your implementation.
+\item \texttt{hash\_params.txt} Each line is a pair of numbers separated by a tab, corresponding to parameters $a$ and $b$ which you may use to define your own hash functions (See explanation below).
+\end{enumerate}
+
+\paragraph{Instructions.}
+Implement the algorithm and run it on the dataset with parameters $\delta = e^{-5}, \epsilon = e\times 10^{-4}$. (Note: with this choice of $\delta$ you will be using 5 hash functions - the 5 pairs $(a,b)$ that you'll need for the hash functions are in \texttt{hash\_params.txt}). Then for each distinct word $i$ in the dataset, compute the relative error $E_r[i] = \frac{\tilde{F}[i] - F[i]}{F[i]}$ and plot these values as a function of the exact word frequency $\frac{F[i]}{t}$. (\textbf{You do not have to implement the algorithm in Spark.}) 
+
+The plot should use a logarithm scale both for the $x$ and the $y$ axes, and there should be ticks to allow reading the powers of 10 (e.g. $10^{-1}$, $10^0$, $10^1$ etc...). The plot should have a title, as well as the $x$ and $y$ axes. The exact frequencies $F[i]$  should be read from the counts file. Note that words of low frequency can have a very large relative error. That is not a bug in your implementation, but just a consequence of the bound we proved in question (a).
+
+Answer the following question by reading values from your plot: What is an approximate condition on a word frequency in the document to have a relative error below $1 = 10^0$ ? 
+
+\paragraph{Hash functions.}
+You may use the following hash function (see example pseudo-code), with $p = 123457$, $a$ and $b$ values provided in the hash params file and \texttt{n\_buckets} (which is equivalent to $\left\lceil \frac{e}{\epsilon} \right\rceil$) chosen according to the specification of the algorithm. In the provided file, each line gives you $a$, $b$ values to create one hash function.
+
+\begin{verbatim}
+# Returns hash(x) for hash function given by parameters a, b, p and n_buckets
+def hash_fun(a, b, p, n_buckets, x) 
+{
+	y = x [modulo] p
+	hash_val = (a*y + b) [modulo] p
+	return hash_val [modulo] n_buckets
+}
+\end{verbatim}
+Note: This hash function implementation produces outputs of value from $0$ to $(\texttt{n\_buckets}-1)$, which is different from our specification in the \textbf{Strategy} part. You can either keep the range as $\{0, ..., \texttt{n\_buckets}-1\}$, or add 1 to the hash result so the value range becomes $\{1, ..., \texttt{n\_buckets}\}$, as long as you stay consistent within your implementation. 
+
+\subsection*{What to submit}
+\begin{enumerate}[(i)]
+	\item Proof that $\pr{\tilde{F}[i] \leq F[i] + \epsilon t} \geq 1-\delta$. [part (a)]
+	\item Log-log plot of the relative error as a function of the frequency. Answer for which word frequencies is the relative error below 1. [part (b)]
+	\item Submit the code on Gradescope submission site. [part (b)]
+\end{enumerate}
+
